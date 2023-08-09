@@ -33,9 +33,22 @@ int main(int argc, char *argv[])
 
     float factor = atof(argv[3]);
 
-    // TODO: Copy header from input file to output file
+    // Copy header from input file to output file
+    // Array of bytes to store the data from the WAV file header.
+    uint8_t header[HEADER_SIZE];
+    fread(header, HEADER_SIZE, 1, input);
+    fwrite(header, HEADER_SIZE, 1, output);
 
-    // TODO: Read samples from input file and write updated data to output file
+    // Read samples from input file and write updated data to output file
+    // Buffer to store audio samples from the WAV file.
+    int16_t buffer;
+
+    while (fread(&buffer, sizeof(int16_t), 1, input))
+    {
+        // Update volume.
+        buffer *= factor;
+        fwrite(&buffer, sizeof(int16_t), 1, output);
+    }
 
     // Close files
     fclose(input);
