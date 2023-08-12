@@ -10,38 +10,89 @@ int get_block_size(WAVHEADER header);
 int main(int argc, char *argv[])
 {
     // Ensure proper usage
-    // TODO #1
+    if (argc != 3)
+    {
+        printf("Usage: ./reverse input.wav output.wav\n");
+
+        return 1;
+    }
 
     // Open input file for reading
-    // TODO #2
+    FILE* in_file = fopen(argv[1], "r");
+
+    if (in_file == NULL)
+    {
+        printf("Could not open file\n");
+
+        return 1;
+    }
 
     // Read header
-    // TODO #3
+    WAVHEADER header;
+    int header_size = sizeof(WAVHEADER);
+    fread(&header, header_size, 1, in_file);
 
     // Use check_format to ensure WAV format
-    // TODO #4
+    if (!check_format(header))
+    {
+        printf("Input is not a WAV file\n");
 
+        return 1;
+    }
+    
     // Open output file for writing
-    // TODO #5
+    FILE* out_file = fopen(argv[2], "w");
 
+    if (out_file == NULL)
+    {
+        printf("Could not open file\n");
+
+        return 1;
+    }
+    
     // Write header to file
-    // TODO #6
+    fwrite(&header, header_size, 1, out_file);
 
     // Use get_block_size to calculate size of block
-    // TODO #7
+    int block_size = get_block_size(header);
 
     // Write reversed audio to file
-    // TODO #8
+    BYTE buffer[block_size];
+    fseek(in_file, 0, SEEK_END);
+    int block = (ftell(in_file) - header_size) / block_size;
+
+    for (int i = block - 1; i >= 0; i--)
+    {
+        fseek(in_file, header_size + i*block_size, SEEK_SET);
+        fread(buffer, block_size, 1, in_file);
+        fwrite(buffer, block_size, 1, out_file);
+    }
+    
+    fclose(in_file);
+    fclose(out_file);
+
+    return 0;
 }
 
 int check_format(WAVHEADER header)
 {
-    // TODO #4
-    return 0;
+    BYTE wav[] = {'W', 'A', 'V', 'E'};
+
+    for (int i = 0; i < 4; i++)
+    {
+        if (header.format[i] != wav[i])
+        {
+            return 0;
+        }
+    }
+    
+    return 1;
 }
 
 int get_block_size(WAVHEADER header)
 {
-    // TODO #7
-    return 0;
+    int bytes_per_sample = header.bitsPerSample / 8;
+    int block_size = header.numChannels * bytes_per_sample;
+
+    return block_size;
 }
