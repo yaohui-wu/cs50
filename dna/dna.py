@@ -3,18 +3,44 @@ import sys
 
 
 def main():
-
     # TODO: Check for command-line usage
+    if len(sys.argv) != 3:
+        sys.exit('Usage: python dna.py data.csv sequence.txt')
 
     # TODO: Read database file into a variable
+    data_filename = sys.argv[1]
+
+    with open(data_filename) as data_file:
+        data = csv.DictReader(data_file)
+        dna_database = list(data)
     
     # TODO: Read DNA sequence file into a variable
+    sequence_filename = sys.argv[2]
+
+    with open(sequence_filename) as sequence_file:
+        sequence = sequence_file.read()
 
     # TODO: Find longest match of each STR in DNA sequence
+    matches = {}
+
+    for i in dna_database[0]:
+        matches[i] = longest_match(sequence, i)
 
     # TODO: Check database for matching profiles
+    matches_count = 1
 
-    return
+    for i in range(len(dna_database)):
+        for j in matches:
+            if str(matches[j]) == dna_database[i][j]:
+                matches_count += 1
+        
+        if matches_count == len(matches):
+            print(dna_database[i]['name'])
+            sys.exit()
+        else:
+            matches_count = 1
+
+    print('No match')
 
 
 def longest_match(sequence, subsequence):
@@ -55,4 +81,5 @@ def longest_match(sequence, subsequence):
     return longest_run
 
 
-main()
+if __name__ == '__main__':
+    main()
